@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { POST } from "../api/Tasks/route";
 
-const TaskForm = () => {
+const TaskForm = ({ task }) => {
+  const EDITMODE = task._id === "new" ? false : true;
   const router = useRouter();
   const handleChange = (e) => {
     const value = e.target.value;
@@ -17,14 +17,26 @@ const TaskForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/Tasks", {
-      method: "POST",
-      body: JSON.stringify({ formData }),
-      "content-type": "application/json",
-    });
+    if (EDITMODE) {
+      const res = await fetch(`/api/Tasks/${task._id}`, {
+        method: "PUT",
+        body: JSON.stringify({ formData }),
+        "content-type": "application/json",
+      });
 
-    if (!res.ok) {
-      throw new Error("Failed to create task");
+      if (!res.ok) {
+        throw new Error("Failed to update task");
+      }
+    } else {
+      const res = await fetch("/api/Tasks", {
+        method: "POST",
+        body: JSON.stringify({ formData }),
+        "content-type": "application/json",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to create task");
+      }
     }
     router.refresh();
     router.push("/");
@@ -38,6 +50,15 @@ const TaskForm = () => {
     status: "Not started",
     category: "Hardware Problem",
   };
+
+  if (EDITMODE) {
+    startingTaskData["title"] = task.title;
+    startingTaskData["description"] = task.description;
+    startingTaskData["priority"] = task.priority;
+    startingTaskData["progress"] = task.progress;
+    startingTaskData["status"] = task.status;
+    startingTaskData["category"] = task.category;
+  }
   const [formData, setFormData] = useState(startingTaskData);
   return (
     <div className="flex justify-center">
@@ -46,7 +67,7 @@ const TaskForm = () => {
         method="post"
         onSubmit={handleSubmit}
       >
-        <h3>Create Your Task</h3>
+        <h3>{EDITMODE ? "Update your Task" : "Create Your Task"}</h3>
         <label>Title</label>
         <input
           id="title"
@@ -139,7 +160,11 @@ const TaskForm = () => {
           <option value="started">Started</option>
           <option value="done">Done</option>
         </select>
-        <input type="submit" className="btn" value="Create Task" />
+        <input
+          type="submit"
+          className="btn"
+          value={EDITMODE ? "Update Task" : "Create Task"}
+        />
       </form>
     </div>
   );

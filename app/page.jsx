@@ -1,4 +1,4 @@
-import TicketCard from "./(components)/TicketCard";
+import TaskCard from "./(components)/TaskCard";
 
 const getTasks = async () => {
   try {
@@ -24,7 +24,7 @@ const Dashboard = async () => {
               {tasks
                 .filter((task) => task.category === uniqueCategory)
                 .map((filteredTask, _index) => (
-                  <TicketCard id={_index} key={_index} ticket={filteredTask} />
+                  <TaskCard id={_index} key={_index} task={filteredTask} />
                 ))}
             </div>
           ))}
